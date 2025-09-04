@@ -23,7 +23,7 @@ import { ContextWithJWTPayload } from 'src/auth/types/context';
 export class ActivityResolver {
   constructor(
     private readonly activityService: ActivityService,
-    private readonly userServices: UserService,
+    private readonly userService: UserService,
   ) {}
 
   @ResolveField(() => ID)
@@ -82,5 +82,38 @@ export class ActivityResolver {
     @Args('createActivityInput') createActivity: CreateActivityInput,
   ): Promise<Activity> {
     return this.activityService.create(context.jwtPayload.id, createActivity);
+  }
+
+  @Mutation(() => [Activity])
+  async addFavoriteActivity(
+    @Args('activityId') activityId: string,
+    @Context('req') req: any,
+  ): Promise<Activity> {
+    const favoritesId = await this.userService.addFavorite(req.user.id, activityId);
+    return this.activityService.findOne(favoritesId);
+  }
+
+  @Mutation(() => [Activity])
+  async removeFavoriteActivity(
+    @Args('activityId') activityId: string,
+    @Context('req') req: any,
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.removeFavorite(req.user.id, activityId);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Mutation(() => [Activity])
+  async reorderFavoriteActivities(
+    @Args({ name: 'newOrder', type: () => [String] }) newOrder: string[],
+    @Context('req') req: any,
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.reorderFavorites(req.user.id, newOrder);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Query(() => [Activity])
+  async getFavoriteActivities(@Context('req') req: any): Promise<Activity[]> {
+    const user = await this.userService.getById(req.user.id);
+    return this.activityService.getActivitiesByIds(user.favorites.map(fav => fav.toString()));
   }
 }

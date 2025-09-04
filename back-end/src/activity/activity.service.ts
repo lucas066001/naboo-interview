@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Activity } from './activity.schema';
 import { CreateActivityInput } from './activity.inputs.dto';
 
@@ -66,5 +66,10 @@ export class ActivityService {
 
   async countDocuments(): Promise<number> {
     return this.activityModel.estimatedDocumentCount().exec();
+  }
+
+  async getActivitiesByIds(ids: string[]): Promise<Activity[]> {
+    const objectIds = ids.map(id => new Types.ObjectId(id));
+    return this.activityModel.find({ _id: { $in: objectIds } }).exec();
   }
 }

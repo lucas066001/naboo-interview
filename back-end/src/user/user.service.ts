@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SignUpInput } from 'src/auth/types';
 import { User } from './user.schema';
 import * as bcrypt from 'bcrypt';
@@ -73,5 +73,34 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async addFavorite(userId: string, activityId: string): Promise<string> {
+    const user = await this.userModel.findById(userId);
+    const activityObjectId = new Types.ObjectId(activityId);
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.favorites.some(fav => fav.equals(activityObjectId))) {
+      user.favorites.push(activityObjectId);
+      await user.save();
+    }
+    return activityObjectId.toString();
+  }
+
+  async removeFavorite(userId: string, activityId: string): Promise<string[]> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    user.favorites = user.favorites.filter(
+      favId => favId.toString() !== activityId,
+    );
+    await user.save();
+    return user.favorites.map(fav => fav.toString());
+  }
+
+  async reorderFavorites(userId: string, newOrder: string[]): Promise<string[]> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    user.favorites = newOrder.map(id => new Types.ObjectId(id));
+    await user.save();
+    return user.favorites.map(fav => fav.toString());
   }
 }
