@@ -85,35 +85,41 @@ export class ActivityResolver {
   }
 
   @Mutation(() => [Activity])
+  @UseGuards(AuthGuard)
   async addFavoriteActivity(
+    @Context() context: ContextWithJWTPayload,
     @Args('activityId') activityId: string,
-    @Context('req') req: any,
-  ): Promise<Activity> {
-    const favoritesId = await this.userService.addFavorite(req.user.id, activityId);
-    return this.activityService.findOne(favoritesId);
-  }
-
-  @Mutation(() => [Activity])
-  async removeFavoriteActivity(
-    @Args('activityId') activityId: string,
-    @Context('req') req: any,
   ): Promise<Activity[]> {
-    const favoritesIds = await this.userService.removeFavorite(req.user.id, activityId);
+    const favoritesIds = await this.userService.addFavorite(context.jwtPayload.id, activityId);
     return this.activityService.getActivitiesByIds(favoritesIds);
   }
 
   @Mutation(() => [Activity])
-  async reorderFavoriteActivities(
-    @Args({ name: 'newOrder', type: () => [String] }) newOrder: string[],
-    @Context('req') req: any,
+  @UseGuards(AuthGuard)
+  async removeFavoriteActivity(
+    @Context() context: ContextWithJWTPayload,
+    @Args('activityId') activityId: string,
   ): Promise<Activity[]> {
-    const favoritesIds = await this.userService.reorderFavorites(req.user.id, newOrder);
+    const favoritesIds = await this.userService.removeFavorite(context.jwtPayload.id, activityId);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Mutation(() => [Activity])
+  @UseGuards(AuthGuard)
+  async reorderFavoriteActivities(
+    @Context() context: ContextWithJWTPayload,
+    @Args({ name: 'newOrder', type: () => [String] }) newOrder: string[],
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.reorderFavorites(context.jwtPayload.id, newOrder);
     return this.activityService.getActivitiesByIds(favoritesIds);
   }
 
   @Query(() => [Activity])
-  async getFavoriteActivities(@Context('req') req: any): Promise<Activity[]> {
-    const user = await this.userService.getById(req.user.id);
+  @UseGuards(AuthGuard)
+  async getFavoriteActivities(   
+    @Context() context: ContextWithJWTPayload,
+  ): Promise<Activity[]> {
+    const user = await this.userService.getById(context.jwtPayload.id);
     return this.activityService.getActivitiesByIds(user.favorites.map(fav => fav.toString()));
   }
 }

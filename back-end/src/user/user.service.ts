@@ -75,7 +75,7 @@ export class UserService {
     return user;
   }
 
-  async addFavorite(userId: string, activityId: string): Promise<string> {
+  async addFavorite(userId: string, activityId: string): Promise<string[]> {
     const user = await this.userModel.findById(userId);
     const activityObjectId = new Types.ObjectId(activityId);
     if (!user) throw new NotFoundException('User not found');
@@ -83,7 +83,7 @@ export class UserService {
       user.favorites.push(activityObjectId);
       await user.save();
     }
-    return activityObjectId.toString();
+    return user.favorites.map(fav => fav.toString());
   }
 
   async removeFavorite(userId: string, activityId: string): Promise<string[]> {
