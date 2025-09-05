@@ -2,12 +2,14 @@ import { ActivityFragment } from "@/graphql/generated/types";
 import { useGlobalStyles } from "@/utils";
 import { Badge, Button, Card, Grid, Group, Image, Text } from "@mantine/core";
 import Link from "next/link";
+import FavoriteButton from "./Button/FavoriteButton";
 
 interface ActivityProps {
   activity: ActivityFragment;
+  isFavorite: boolean;
 }
 
-export function Activity({ activity }: ActivityProps) {
+export function Activity({ activity, isFavorite }: ActivityProps) {
   const { classes } = useGlobalStyles();
 
   return (
@@ -25,6 +27,7 @@ export function Activity({ activity }: ActivityProps) {
           <Text weight={500} className={classes.ellipsis}>
             {activity.name}
           </Text>
+          <FavoriteButton activityId={activity.id} isFavorite={isFavorite} />
         </Group>
 
         <Group mt="md" mb="xs">

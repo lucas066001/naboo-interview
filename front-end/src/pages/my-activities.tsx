@@ -6,7 +6,7 @@ import {
 } from "@/graphql/generated/types";
 import GetUserActivities from "@/graphql/queries/activity/getUserActivities";
 import { withAuth } from "@/hocs";
-import { useAuth } from "@/hooks";
+import { useAuth, useFavoriteActivity } from "@/hooks";
 import { Button, Grid, Group } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -31,6 +31,7 @@ export const getServerSideProps: GetServerSideProps<
 
 const MyActivities = ({ activities }: MyActivitiesProps) => {
   const { user } = useAuth();
+  const { favoriteIds } = useFavoriteActivity();
 
   return (
     <>
@@ -48,7 +49,7 @@ const MyActivities = ({ activities }: MyActivitiesProps) => {
       <Grid>
         {activities.length > 0 ? (
           activities.map((activity) => (
-            <Activity activity={activity} key={activity.id} />
+            <Activity activity={activity} key={activity.id} isFavorite={favoriteIds.includes(activity.id)}/>
           ))
         ) : (
           <EmptyData />

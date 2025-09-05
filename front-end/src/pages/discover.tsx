@@ -3,9 +3,12 @@ import { graphqlClient } from "@/graphql/apollo";
 import {
   GetActivitiesQuery,
   GetActivitiesQueryVariables,
+  GetFavoriteActivitiesQuery,
 } from "@/graphql/generated/types";
 import GetActivities from "@/graphql/queries/activity/getActivities";
-import { useAuth } from "@/hooks";
+import GetFavoriteActivities from "@/graphql/queries/activity/getFavoriteActivities";
+import { useAuth, useFavoriteActivity } from "@/hooks";
+import { useQuery } from "@apollo/client";
 import { Button, Grid, Group } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -29,6 +32,7 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function Discover({ activities }: DiscoverProps) {
   const { user } = useAuth();
+  const { favoriteIds } = useFavoriteActivity();
 
   return (
     <>
@@ -46,7 +50,7 @@ export default function Discover({ activities }: DiscoverProps) {
       <Grid>
         {activities.length > 0 ? (
           activities.map((activity) => (
-            <Activity activity={activity} key={activity.id} />
+            <Activity activity={activity} key={activity.id} isFavorite={favoriteIds.includes(activity.id)} />
           ))
         ) : (
           <EmptyData />
