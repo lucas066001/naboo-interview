@@ -5,7 +5,7 @@ import RemoveFavoriteActivity from "@/graphql/mutations/activity/removeFavoriteA
 import { useSnackbar } from "./useSnackbar";
 import UnauthorizedMessage from "@/components/Messages/UnauthorizedAction";
 import GetFavoriteActivities from "@/graphql/queries/activity/getFavoriteActivities";
-import { GetFavoriteActivitiesQuery } from "@/graphql/generated/types";
+import { ActivityFragment, GetFavoriteActivitiesQuery } from "@/graphql/generated/types";
 
 export const useFavoriteActivity = () => {
   const { user } = useAuth();
@@ -14,6 +14,7 @@ export const useFavoriteActivity = () => {
   // Récupération des favoris
   const { data, loading, error } = useQuery<GetFavoriteActivitiesQuery>(GetFavoriteActivities);
   const favoriteIds : string[] = data?.getFavoriteActivities.map((fav) => fav.id) ?? [];
+  const favoriteFragments : ActivityFragment[] = data?.getFavoriteActivities ?? [];
 
   const [addFavoriteActivity] = useMutation(AddFavoriteActivity, {
     update(cache, { data }) {
@@ -57,6 +58,7 @@ export const useFavoriteActivity = () => {
   };
 
   return { 
+    favoriteFragments,
     favoriteIds,
     loading,
     error,
