@@ -6,7 +6,7 @@ import {
   GetActivityQueryVariables,
 } from "@/graphql/generated/types";
 import GetActivity from "@/graphql/queries/activity/getActivity";
-import { useFavoriteActivity } from "@/hooks";
+import { useAuth, useFavoriteActivity } from "@/hooks";
 import { Badge, Flex, Grid, Group, Image, Text } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -34,7 +34,9 @@ export const getServerSideProps: GetServerSideProps<
 export default function ActivityDetails({ activity }: ActivityDetailsProps) {
   const router = useRouter();
   const { favoriteIds } = useFavoriteActivity();
-
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  
   return (
     <>
       <Head>
@@ -66,6 +68,11 @@ export default function ActivityDetails({ activity }: ActivityDetailsProps) {
             <Text size="sm">{activity.description}</Text>
             <Text size="sm" color="dimmed">
               Ajouté par {activity.owner.firstName} {activity.owner.lastName}
+              {isAdmin && activity.createdAt && (
+                  <Text size="xs" color="gray">
+                    Créée le : {new Date(activity.createdAt).toLocaleString()}
+                  </Text>
+              )}
             </Text>
           </Flex>
         </Grid.Col>

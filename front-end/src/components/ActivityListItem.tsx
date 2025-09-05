@@ -3,6 +3,7 @@ import { useGlobalStyles } from "@/utils";
 import { Box, Button, Flex, Image, Text } from "@mantine/core";
 import Link from "next/link";
 import FavoriteButton from "./Button/FavoriteButton";
+import { useAuth } from "@/hooks";
 
 interface ActivityListItemProps {
   activity: ActivityFragment;
@@ -11,7 +12,9 @@ interface ActivityListItemProps {
 
 export function ActivityListItem({ activity, isFavorite }: ActivityListItemProps) {
   const { classes } = useGlobalStyles();
-
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  
   return (
     <Flex align="center" justify="space-between">
       <Flex gap="md" align="center">
@@ -33,6 +36,11 @@ export function ActivityListItem({ activity, isFavorite }: ActivityListItemProps
         </Box>
       </Flex>
       <FavoriteButton activityId={activity.id} isFavorite={isFavorite} />
+              {isAdmin && activity.createdAt && (
+          <Text size="xs" color="gray">
+            Créée le : {new Date(activity.createdAt).toLocaleString()}
+          </Text>
+        )}
       <Link href={`/activities/${activity.id}`} className={classes.link}>
         <Button variant="outline" color="dark">
           Voir plus
