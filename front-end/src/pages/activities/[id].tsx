@@ -1,10 +1,12 @@
 import { PageTitle } from "@/components";
+import FavoriteButton from "@/components/Button/FavoriteButton";
 import { graphqlClient } from "@/graphql/apollo";
 import {
   GetActivityQuery,
   GetActivityQueryVariables,
 } from "@/graphql/generated/types";
 import GetActivity from "@/graphql/queries/activity/getActivity";
+import { useFavoriteActivity } from "@/hooks";
 import { Badge, Flex, Grid, Group, Image, Text } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -31,6 +33,7 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function ActivityDetails({ activity }: ActivityDetailsProps) {
   const router = useRouter();
+  const { favoriteIds } = useFavoriteActivity();
 
   return (
     <>
@@ -51,6 +54,8 @@ export default function ActivityDetails({ activity }: ActivityDetailsProps) {
         <Grid.Col span={5}>
           <Flex direction="column" gap="md">
             <Group mt="md" mb="xs">
+              <FavoriteButton activityId={activity.id} isFavorite={favoriteIds.includes(activity.id)} />
+
               <Badge color="pink" variant="light">
                 {activity.city}
               </Badge>

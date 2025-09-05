@@ -23,7 +23,7 @@ import { ContextWithJWTPayload } from 'src/auth/types/context';
 export class ActivityResolver {
   constructor(
     private readonly activityService: ActivityService,
-    private readonly userServices: UserService,
+    private readonly userService: UserService,
   ) {}
 
   @ResolveField(() => ID)
@@ -82,5 +82,44 @@ export class ActivityResolver {
     @Args('createActivityInput') createActivity: CreateActivityInput,
   ): Promise<Activity> {
     return this.activityService.create(context.jwtPayload.id, createActivity);
+  }
+
+  @Mutation(() => [Activity])
+  @UseGuards(AuthGuard)
+  async addFavoriteActivity(
+    @Context() context: ContextWithJWTPayload,
+    @Args('activityId') activityId: string,
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.addFavorite(context.jwtPayload.id, activityId);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Mutation(() => [Activity])
+  @UseGuards(AuthGuard)
+  async removeFavoriteActivity(
+    @Context() context: ContextWithJWTPayload,
+    @Args('activityId') activityId: string,
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.removeFavorite(context.jwtPayload.id, activityId);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Mutation(() => [Activity])
+  @UseGuards(AuthGuard)
+  async reorderFavoriteActivities(
+    @Context() context: ContextWithJWTPayload,
+    @Args({ name: 'newOrder', type: () => [String] }) newOrder: string[],
+  ): Promise<Activity[]> {
+    const favoritesIds = await this.userService.reorderFavorites(context.jwtPayload.id, newOrder);
+    return this.activityService.getActivitiesByIds(favoritesIds);
+  }
+
+  @Query(() => [Activity])
+  @UseGuards(AuthGuard)
+  async getFavoriteActivities(   
+    @Context() context: ContextWithJWTPayload,
+  ): Promise<Activity[]> {
+    const user = await this.userService.getById(context.jwtPayload.id);
+    return this.activityService.getActivitiesByIds(user.favorites.map(fav => fav.toString()));
   }
 }

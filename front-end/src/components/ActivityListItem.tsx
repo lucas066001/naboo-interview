@@ -2,12 +2,14 @@ import { ActivityFragment } from "@/graphql/generated/types";
 import { useGlobalStyles } from "@/utils";
 import { Box, Button, Flex, Image, Text } from "@mantine/core";
 import Link from "next/link";
+import FavoriteButton from "./Button/FavoriteButton";
 
 interface ActivityListItemProps {
   activity: ActivityFragment;
+  isFavorite: boolean;
 }
 
-export function ActivityListItem({ activity }: ActivityListItemProps) {
+export function ActivityListItem({ activity, isFavorite }: ActivityListItemProps) {
   const { classes } = useGlobalStyles();
 
   return (
@@ -30,6 +32,7 @@ export function ActivityListItem({ activity }: ActivityListItemProps) {
           >{`${activity.price}€/j`}</Text>
         </Box>
       </Flex>
+      <FavoriteButton activityId={activity.id} isFavorite={isFavorite} />
       <Link href={`/activities/${activity.id}`} className={classes.link}>
         <Button variant="outline" color="dark">
           Voir plus

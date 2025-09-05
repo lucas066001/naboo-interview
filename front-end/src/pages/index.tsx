@@ -10,6 +10,7 @@ import {
   GetLatestActivitiesQueryVariables,
 } from "@/graphql/generated/types";
 import GetLatestActivities from "@/graphql/queries/activity/getLatestActivities";
+import { useFavoriteActivity } from "@/hooks";
 
 interface HomeProps {
   activities: GetLatestActivitiesQuery["getLatestActivities"];
@@ -28,6 +29,7 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
 
 export default function Home({ activities }: HomeProps) {
   const { classes } = useGlobalStyles();
+  const { favoriteIds } = useFavoriteActivity();
 
   return (
     <>
@@ -72,7 +74,7 @@ export default function Home({ activities }: HomeProps) {
             </Flex>
             <Grid>
               {activities.map((activity) => (
-                <Activity activity={activity} key={activity.id} />
+                <Activity activity={activity} key={activity.id} isFavorite={favoriteIds.includes(activity.id)} />
               ))}
             </Grid>
           </>

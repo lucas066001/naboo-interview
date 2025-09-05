@@ -3,15 +3,18 @@ import { graphqlClient } from "@/graphql/apollo";
 import {
   GetActivitiesByCityQuery,
   GetActivitiesByCityQueryVariables,
+  GetFavoriteActivitiesQuery,
 } from "@/graphql/generated/types";
 import GetActivitiesByCity from "@/graphql/queries/activity/getActivitiesByCity";
-import { useDebounced } from "@/hooks";
+import GetFavoriteActivities from "@/graphql/queries/activity/getFavoriteActivities";
+import { useDebounced, useFavoriteActivity } from "@/hooks";
 import { Divider, Flex, Grid } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
+import { useQuery } from "@apollo/client";
 
 interface CityDetailsProps {
   activities: GetActivitiesByCityQuery["getActivitiesByCity"];
@@ -41,6 +44,7 @@ export const getServerSideProps: GetServerSideProps<CityDetailsProps> = async ({
       price: query.price ? Number(query.price) : null,
     },
   });
+
   return {
     props: { activities: response.data.getActivitiesByCity, city: params.city },
   };
@@ -62,6 +66,8 @@ export default function ActivityDetails({
     searchParams?.get("price") ? Number(searchParams.get("price")) : undefined
   );
   const debouncedSearchPrice = useDebounced(searchPrice, 300);
+
+  const { favoriteIds } = useFavoriteActivity();
 
   useEffect(() => {
     const searchParams = new URLSearchParams();
@@ -103,7 +109,10 @@ export default function ActivityDetails({
             {activities.length > 0 ? (
               activities.map((activity, idx) => (
                 <Fragment key={activity.id}>
-                  <ActivityListItem activity={activity} />
+                  <ActivityListItem
+                    activity={activity}
+                    isFavorite={favoriteIds.includes(activity.id)}
+                  />
                   {idx < activities.length - 1 && <Divider my="sm" />}
                 </Fragment>
               ))
