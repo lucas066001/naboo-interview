@@ -3,6 +3,7 @@ import { useGlobalStyles } from "@/utils";
 import { Badge, Button, Card, Grid, Group, Image, Text } from "@mantine/core";
 import Link from "next/link";
 import FavoriteButton from "./Button/FavoriteButton";
+import { useAuth } from "@/hooks";
 
 interface ActivityProps {
   activity: ActivityFragment;
@@ -11,7 +12,9 @@ interface ActivityProps {
 
 export function Activity({ activity, isFavorite }: ActivityProps) {
   const { classes } = useGlobalStyles();
-
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  
   return (
     <Grid.Col span={4}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -38,6 +41,12 @@ export function Activity({ activity, isFavorite }: ActivityProps) {
             {`${activity.price}€/j`}
           </Badge>
         </Group>
+
+        {isAdmin && activity.createdAt && (
+          <Text size="xs" color="gray">
+            Créée le : {new Date(activity.createdAt).toLocaleString()}
+          </Text>
+        )}
 
         <Text size="sm" color="dimmed" className={classes.ellipsis}>
           {activity.description}
