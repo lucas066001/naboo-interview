@@ -6,6 +6,7 @@ import { useSnackbar } from "./useSnackbar";
 import UnauthorizedMessage from "@/components/Messages/UnauthorizedAction";
 import GetFavoriteActivities from "@/graphql/queries/activity/getFavoriteActivities";
 import { ActivityFragment, GetFavoriteActivitiesQuery } from "@/graphql/generated/types";
+import ReorderFavoriteActivities from "@/graphql/mutations/activity/reorderFavoriteActivities";
 
 export const useFavoriteActivity = () => {
   const { user } = useAuth();
@@ -15,6 +16,25 @@ export const useFavoriteActivity = () => {
   const { data, loading, error } = useQuery<GetFavoriteActivitiesQuery>(GetFavoriteActivities);
   const favoriteIds : string[] = data?.getFavoriteActivities.map((fav) => fav.id) ?? [];
   const favoriteFragments : ActivityFragment[] = data?.getFavoriteActivities ?? [];
+
+  const [reorderFavoriteActivities] = useMutation(ReorderFavoriteActivities, {
+    update(cache, { data }) {
+      if (!data?.reorderFavoriteActivities) return;
+      cache.writeQuery({
+        query: GetFavoriteActivities,
+        data: { getFavoriteActivities: data.reorderFavoriteActivities },
+      });
+    },
+  });
+
+  const handleReorderFavorites = async (newOrder: string[]) => {
+    try {
+      await reorderFavoriteActivities({ variables: { newOrder } });
+      snackbar.success("L'ordre des favoris a été mis à jour.");
+    } catch (error) {
+      snackbar.error("Erreur lors du réordonnancement des favoris.");
+    }
+  };
 
   const [addFavoriteActivity] = useMutation(AddFavoriteActivity, {
     update(cache, { data }) {
@@ -62,6 +82,7 @@ export const useFavoriteActivity = () => {
     favoriteIds,
     loading,
     error,
-    handleToggleFavorite 
+    handleToggleFavorite,
+    handleReorderFavorites
   };
 };
