@@ -1,3 +1,4 @@
+import { graphqlClient } from "@/graphql/apollo";
 import {
   GetUserQuery,
   GetUserQueryVariables,
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       await logout();
+      await graphqlClient.clearStore();
       localStorage.removeItem("token");
       setUser(null);
       router.push("/");
