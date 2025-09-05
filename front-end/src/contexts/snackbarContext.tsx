@@ -3,18 +3,18 @@ import { IconX } from "@tabler/icons-react";
 import { createContext, useEffect, useState } from "react";
 
 interface SnackbarContextType {
-  error: (message: string) => void;
-  success: (message: string) => void;
+  error: (message: string | React.ReactNode) => void;
+  success: (message: string | React.ReactNode) => void;
 }
 
 interface Snackbar {
-  message: string;
+  message: string | React.ReactNode;
   type: "error" | "success";
 }
 
 export const SnackbarContext = createContext<SnackbarContextType>({
-  error: () => {},
-  success: () => {},
+  error: (message: string | React.ReactNode) => {},
+  success: (message: string | React.ReactNode) => {},
 });
 
 export const SnackbarProvider = ({
@@ -24,12 +24,12 @@ export const SnackbarProvider = ({
 }) => {
   const [snackbar, setSnackbar] = useState<Snackbar | null>(null);
 
-  const error = (message: string) => {
+  const error = (message: string | React.ReactNode) => {
     console.error(message);
     setSnackbar({ message, type: "error" });
   };
 
-  const success = (message: string) => {
+  const success = (message: string | React.ReactNode) => {
     setSnackbar({ message, type: "success" });
   };
 
